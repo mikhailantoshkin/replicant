@@ -1,0 +1,63 @@
+openapi: 3.0.0
+info:
+  title: replicant api
+  version: "0.0.1"
+
+paths:
+  /status:
+    get:
+      operationId: status
+      x-openapi-router-controller: general
+      summary: Get node status
+      tags:
+        - Status
+      responses:
+        '200':
+          description: Current status
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Status"
+
+  /is_available:
+    get:
+      operationId: is_available
+      x-openapi-router-controller: general
+      summary: Get node status
+      tags:
+        - Status
+      parameters:
+        - name: node_ip
+          in: path
+          required: true
+          schema:
+            type: string
+            format: ipv4
+
+      responses:
+        '200':
+          description: Node availablility
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Availablility"
+
+components:
+  schemas:
+    Status:
+      type: object
+      properties:
+        master:
+          type: boolean
+          readOnly: true
+        priority:
+          type: integer
+          readOnly: true
+
+
+    Availablility:
+      type: object
+      properties:
+        available:
+          type: boolean
+          readOnly: true
