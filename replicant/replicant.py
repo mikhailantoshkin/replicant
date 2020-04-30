@@ -3,15 +3,29 @@ import enum
 
 from replicant.config import configuration
 from replicant.utils import run_forever
-from collections import namedtuple
-from aiohttp import ClientSession, ClientConnectionError
+from aiohttp import ClientSession
 from replicant.utils import cancel_and_stop_task
+import logging
 
-Node = namedtuple('Node', 'name addr status master priority')
+logger = logging.getLogger(__name__)
+
 
 class Status(enum.Enum):
     AVAILABLE = 0
     UNAVAILABLE = 1
+
+
+class Node:
+    def __init__(
+            self, name: str, addr: str,
+            status: Status, master: bool, priority: int
+    ):
+        self.name = name
+        self.addr = addr
+        self.status = status
+        self.master = master
+        self.priority = priority
+
 
 class Replicant:
 
@@ -27,6 +41,10 @@ class Replicant:
     @property
     def nodes_statuses(self):
         return {node.name: node.status.name for node in self._nodes}
+
+    @property
+    def status(self):
+        return {'mode': self._mode, 'master': self.master, 'priority': self._priority}
 
     async def start(self):
         # init DB
@@ -52,18 +70,20 @@ class Replicant:
     async def _update_nodes(self):
         for node in self._nodes:
             try:
-                resp = await self._session.get(f'http://{node.addr}/status')
-                assert resp.status == 200
-                node.status = Status.AVAILABLE
-                data = await resp.json()
-                node.master = data['master']
-                node.priority = data['priority']
-                await resp.close()
-            except (ClientConnectionError, AssertionError):
+                logger.debug(f'Checking {node.addr}')
+                async with self._session.get(f'http://{node.addr}/status', timeout=5) as resp:
+
+                    assert resp.status == 200
+                    node.status = Status.AVAILABLE
+                    data = await resp.json()
+                    node.master = data['master']
+                    node.priority = data['priority']
+            except Exception:
                 node.status = Status.UNAVAILABLE
 
     @run_forever(repeat_delay=60)
     async def check_neighbours(self):
+        print('checking neighbours')
         await self._update_nodes()
         if all([node.status == Status.UNAVAILABLE for node in self._nodes]):
             raise RuntimeError('Im blind')

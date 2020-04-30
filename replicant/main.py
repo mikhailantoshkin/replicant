@@ -16,10 +16,6 @@ logger = logging.getLogger(__name__)
 spec_dir = 'replicant/api'
 spec_file = 'swagger.yml'
 
-def sig_handler(loop):
-    logging.info('Receive interrupt signal')
-    loop.stop()
-
 
 def main():
 

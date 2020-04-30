@@ -1,8 +1,20 @@
-def is_available(node_ip):  # noqa: E501
+from aiohttp import web
+from aiohttp import ClientSession, ClientConnectionError, ServerTimeoutError
 
-    return 'do some magic!'
+
+async def is_available(request: web.Request, node_ip: str):  # noqa: E501
+    session: ClientSession = request.app['session']
+    try:
+        resp = await session.get(f'https://192.168.244.3', timeout=5)
+    except Exception:
+        return {'available': False}
+
+    if resp.status == 200:
+        return {'available': True}
+    return {'available': False}
 
 
-def status():  # noqa: E501
+async def status(request: web.Request):  # noqa: E501
+    replicant = request.app['replicant']
+    return replicant.status
 
-    return 'do some magic!'
