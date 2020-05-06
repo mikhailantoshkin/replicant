@@ -9,6 +9,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+
 def parse_config(conf_path) -> Dict[str, str]:
     config = configparser.ConfigParser()
     if not config.read(conf_path):

@@ -4,7 +4,7 @@ import enum
 from replicant.config import configuration
 from replicant.utils import run_forever
 from aiohttp import ClientSession
-from replicant.utils import cancel_and_stop_task
+from replicant.utils import cancel_and_stop_task, run_cmd
 import logging
 
 logger = logging.getLogger(__name__)
@@ -37,6 +37,7 @@ class Replicant:
         self._nodes = [Node(name, addr, Status.UNAVAILABLE, False, -1) for name, addr in configuration['nodes'].items()]
         self._session = session
         self._background_task = None
+        self._background_db = None
 
     @property
     def nodes_statuses(self):
@@ -48,6 +49,7 @@ class Replicant:
 
     async def start(self):
         # init DB
+        self._background_db = asyncio.create_task(run_cmd('docker-entrypoint.sh postgres', '/'))
         self._background_task = asyncio.create_task(self.check_neighbours())
 
     async def stop(self):

@@ -38,9 +38,9 @@ def main():
 
     app.on_startup.append(on_startup)
     app.on_cleanup.append(on_cleanup)
-
+    logger.debug('Server is starting')
     web.run_app(app)
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     main()
