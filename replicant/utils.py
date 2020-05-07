@@ -1,11 +1,13 @@
 import asyncio
 import configparser
+import datetime
 import os
 from asyncio import CancelledError, sleep, Task
 from distutils import util
 from functools import wraps
 from typing import Dict, Any, Callable, Coroutine, Tuple
 import logging
+import asyncpg
 
 logger = logging.getLogger(__name__)
 
@@ -20,7 +22,7 @@ def parse_config(conf_path) -> Dict[str, str]:
         'mode': conf['REPLICANT_MODE'],
         'arbiter_addr': conf['ARBITER_ADDR'],
         'nodes': {node_name: node_addr for node_name, node_addr in nodes.items()},
-        'master': util.strtobool(conf.get('IS_MASTER', 'false')),
+        'master': bool(util.strtobool(conf.get('IS_MASTER', 'false'))),
         'priority': conf['PRIORITY']
     }
     return configuration
@@ -92,3 +94,28 @@ async def cancel_and_stop_task(task: Task):
 
     else:
         logger.debug('Task finished successfully')
+
+
+def set_privileges(user_uid, user_gid):
+    def result():
+        os.setgid(user_gid)
+        os.setuid(user_uid)
+
+    return result
+
+
+async def init_db():
+    user = os.environ.get('POSTGRES_USER')
+    db = os.environ.get('POSTGRES_DB')
+    conn = await asyncpg.connect(user=user, database=db)
+    await conn.execute('''
+          CREATE TABLE users(
+              id serial PRIMARY KEY,
+              name text,
+              dob date
+          )
+      ''')
+    await conn.execute('''
+            INSERT INTO users(name, dob) VALUES($1, $2)
+        ''', 'Bob', datetime.date(1984, 3, 1))
+    await conn.close()
