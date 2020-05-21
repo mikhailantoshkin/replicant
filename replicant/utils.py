@@ -73,9 +73,6 @@ async def run_cmd(cmd: str, cwd: str, **kwargs: Any) -> Tuple[str, str]:
 
 
 async def cancel_and_stop_task(task: Task):
-    """
-    Отменяет задачу и ожидает её завершения.
-    """
     if task.cancelled():
         logger.debug('Task already canceled')
         return
@@ -87,7 +84,6 @@ async def cancel_and_stop_task(task: Task):
 
     except CancelledError:
         logger.debug('Task has been canceled')
-        # WARN: Здесь НЕЛЬЗЯ делать `raise' потому что тогда данная функция никогда не закончится.
 
     except Exception as err:
         logger.exception(f'Task finished with error ({err}):')

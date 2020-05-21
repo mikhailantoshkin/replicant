@@ -19,6 +19,21 @@ paths:
               schema:
                 $ref: "#/components/schemas/Status"
 
+  /node_info:
+    get:
+      operationId: node_info
+      x-openapi-router-controller: general
+      summary: Get node info
+      tags:
+        - Status
+      responses:
+        '200':
+          description: Node info as pg_controldata returns it
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Status"
+
   /is_available:
     get:
       operationId: is_available
