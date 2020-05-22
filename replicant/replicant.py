@@ -1,7 +1,7 @@
 import asyncio
 import enum
 import pwd
-
+from asyncpg.exceptions import DuplicateTableError
 from replicant.config import configuration
 from replicant.utils import run_forever
 from aiohttp import ClientSession
@@ -60,11 +60,15 @@ class Replicant:
         if self.master:
             retries = 0
             while retries < 10:
+                await asyncio.sleep(5)
                 try:
                     await init_db()
-                except Exception:
+                except DuplicateTableError:
+                    logger.warning('db already initialised')
+                    break
+                except Exception as err:
+                    logger.exception(err)
                     retries += 1
-                    await asyncio.sleep(10)
                 else:
                     break
             else:

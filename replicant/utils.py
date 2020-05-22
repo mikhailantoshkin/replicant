@@ -115,3 +115,5 @@ async def init_db():
             INSERT INTO users(name, dob) VALUES($1, $2)
         ''', 'Bob', datetime.date(1984, 3, 1))
     await conn.close()
+    logger.info('db initialised')
+

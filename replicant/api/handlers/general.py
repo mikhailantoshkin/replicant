@@ -27,4 +27,4 @@ async def node_info(request: web.Request):
     user_uid = pw_record.pw_uid
     user_gid = pw_record.pw_gid
     stdout, stderr = await run_cmd(cmd, '/', preexec_fn=set_privileges(user_uid, user_gid))
-    return {'data': f'STDOUT:\n{stdout}\nSTDERR:\n{stderr}'}
+    return web.Response(text=f'STDOUT:\n{stdout}\nSTDERR:\n{stderr}')

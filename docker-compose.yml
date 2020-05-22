@@ -15,7 +15,7 @@ services:
       PG_REP_PASSWORD: 123456
     volumes:
       #- ./pg_data:/var/lib/postgresql/data
-      - ./replicant:/opt/replicant/replicant
+      #- ./replicant:/opt/replicant/replicant
       - ./master/conf.ini:/opt/replicant/replicant/conf.ini
     ports:
     - 80:8080
